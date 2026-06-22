@@ -2,7 +2,7 @@
 
 This project provides Docker Compose configuration to run CalculiX in a containerized environment.
 
-CalculiX is an open-source program for Finite Element Analysis (FEA) of structural problems. This project builds and runs CalculiX 2.20 inside an Ubuntu 22.04 container, so you can use it without installing the toolchain on your host machine.
+CalculiX is an open-source program for Finite Element Analysis (FEA) of structural problems. This project builds and runs CalculiX 2.23 inside an Ubuntu 26.04 container, so you can use it without installing the toolchain on your host machine.
 
 ## 📦 Requirements
 

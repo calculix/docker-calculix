@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:26.04
+ARG CALCULIX_VERSION=2.23
 
 # Install dependencies
 RUN apt-get update -y && apt-get upgrade -y && \
@@ -7,6 +8,10 @@ RUN apt-get install -y neovim
 RUN apt-get install -y python3 python3-pip && \
     apt-get install -y build-essential gcc g++ gfortran make
 
-RUN adduser ubuntu
+# RUN adduser ubuntu
 COPY ./scripts/setup-calculix.sh /opt/setup-calculix.sh
-RUN bash /opt/setup-calculix.sh 
+RUN bash /opt/setup-calculix.sh $CALCULIX_VERSION
+
+USER ubuntu
+RUN echo "PATH=/opt/CalculiX/bin:$PATH" >> $HOME/.bashrc
+CMD ["/bin/bash"]

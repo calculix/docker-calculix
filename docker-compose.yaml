@@ -3,7 +3,7 @@ services:
   ubuntu:
     container_name: ubuntu-calculix
     build: ubuntu-calculix
-    user: root
+    user: ubuntu
     working_dir: /home/ubuntu
     command: /bin/bash
     tty: true
