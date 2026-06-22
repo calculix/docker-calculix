@@ -1,6 +1,9 @@
 #!/bin/sh
+set -e
 
-cd $(HOME)
+CALCULIX_VERSION="${1:?Usage: setup-calculix.sh <calculix-version>}"
+
+cd "$HOME"
 mkdir build-calculix
 cd build-calculix
 
@@ -11,7 +14,7 @@ curl -OL https://netlib.org/linalg/spooles/spooles.2.2.tgz
 tar -xzf spooles.2.2.tgz
 
 sed -i "s/  CC = \/usr\/lang-4.0\/bin\/cc/  CC = gcc/" Make.inc
-sed -i "s/  OPTLEVEL = -O/  OPTLEVEL = -O2/" Make.inc
+sed -i "s/  OPTLEVEL = -O/  OPTLEVEL = -O2 -fcommon -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch -Wno-error=int-conversion -Wno-error=incompatible-pointer-types/" Make.inc
 make lib
 cd ../
 
@@ -31,23 +34,28 @@ make lib
 cd ../
 
 # Build CalculiX --------------------------------------------------------------
-curl -OL http://www.dhondt.de/ccx_2.20.src.tar.bz2
-curl -OL http://www.dhondt.de/ccx_2.20.test.tar.bz2
-curl -OL http://www.dhondt.de/ccx_2.20.doc.tar.bz2
-tar -xf ccx_2.20.src.tar.bz2
-tar -xf ccx_2.20.test.tar.bz2
-tar -xf ccx_2.20.doc.tar.bz2
-cd CalculiX/ccx_2.20/src
+curl -OL http://www.dhondt.de/ccx_${CALCULIX_VERSION}.src.tar.bz2
+curl -OL http://www.dhondt.de/ccx_${CALCULIX_VERSION}.test.tar.bz2
+curl -OL http://www.dhondt.de/ccx_${CALCULIX_VERSION}.doc.tar.bz2
+tar -xf ccx_${CALCULIX_VERSION}.src.tar.bz2
+tar -xf ccx_${CALCULIX_VERSION}.test.tar.bz2
+tar -xf ccx_${CALCULIX_VERSION}.doc.tar.bz2
+cd CalculiX/ccx_${CALCULIX_VERSION}/src
 
-sed -i "s/@ARGV=\"ccx_2.20step.c\";/@ARGV=\"CalculiXstep.c\";/" date.pl
+sed -i "s/@ARGV=\"ccx_${CALCULIX_VERSION}step.c\";/@ARGV=\"CalculiXstep.c\";/" date.pl
 sed -i "s/FFLAGS = -Wall -O2/FFLAGS = -Wall -O2 -fallow-argument-mismatch/" Makefile
+sed -i "s/CFLAGS = -Wall -O2/CFLAGS = -Wall -O2 -fcommon -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch -Wno-error=int-conversion -Wno-error=incompatible-pointer-types /" Makefile
 sed -i "s/..\/..\/..\/ARPACK\/libarpack_INTEL.a /..\/..\/..\/ARPACK\/libarpack_Linux.a /" Makefile
 make
+if [ ! -x "ccx_${CALCULIX_VERSION}" ]; then
+    echo "ERROR: CalculiX build failed: 'ccx_${CALCULIX_VERSION}' was not produced" >&2
+    exit 1
+fi
 mkdir -p /opt/CalculiX
-mkdir /opt/CalculiX/bin
+mkdir -p /opt/CalculiX/bin
 cd ../../..
-cp -R CalculiX/ccx_2.20/src/ccx_2.20 /opt/CalculiX/bin/ccx
-cp -R CalculiX/ccx_2.20/test /opt/CalculiX/test
-cp -R CalculiX/ccx_2.20/doc /opt/CalculiX/doc
+cp -R CalculiX/ccx_${CALCULIX_VERSION}/src/ccx_${CALCULIX_VERSION} /opt/CalculiX/bin/ccx
+cp -R CalculiX/ccx_${CALCULIX_VERSION}/test /opt/CalculiX/test
+cp -R CalculiX/ccx_${CALCULIX_VERSION}/doc /opt/CalculiX/doc
 cd ../
 rm -rf build-calculix
